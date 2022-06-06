@@ -34,7 +34,7 @@ try {
 </body>
 </html>
         `;
-  fs.writeFileSync(`dist/subapps/dev-ops-h5/HealthCheck.html`, versionStr);
+  fs.writeFileSync(`dist/subapps/compute-h5/HealthCheck.html`, versionStr);
 } catch (e) {
   throw new Error(e);
 }

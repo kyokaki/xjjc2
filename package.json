@@ -1,7 +1,7 @@
 {
-  "name": "xjcc-dev-ops-web",
+  "name": "compute-h5",
   "version": "4.4.0",
-  "description": "xjcc-dev-ops-web with Element UI & axios & iconfont & permission control & lint",
+  "description": "compute-h5 with Element UI & axios & iconfont & permission control & lint",
   "author": "Pan <panfree23@gmail.com>",
   "scripts": {
     "dev": "vue-cli-service serve",

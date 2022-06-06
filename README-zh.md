@@ -34,10 +34,10 @@
 
 ```bash
 # 克隆项目
-git clone http://61.240.206.151:8090/hsg/xjcc-dev-ops-web.git 
+git clone http://183.240.17.6:8090/xjcc/compute-h5.git 
 
 # 进入项目目录
-cd xjcc-dev-ops-web
+cd compute-h5
 
 # 安装依赖
 npm install
@@ -117,26 +117,3 @@ npm install -g @vue/cli@4.5.13
 
 5 卸载vue
 npm uninstall -g @vue/cli
-
-## 测试环境部署
-### 1.构建测试环境 dev分支
-npm install --registry=https://registry.npm.taobao.org
-npm run build:test
-#### 进入生成打包文件的目录
-cd ./dist
-#### 把生成的项目打包成压缩包，方便移动到项目部署目录
-tar -zcvf xjcc-dev-ops-web.tar.gz * 
-
-### 2.切换test分支
-保存打包后文件到git服务器
-### 3.备份删除172.26.7.208的之前的部署文件
-rm -rf  /var/www/backup/xjcc-dev-ops-web-backup/
-cp -avx /var/www/xjcc-dev-ops-web/ /var/www/backup/xjcc-dev-ops-web-backup
-### 4.打开sftp 上传跳板机
-rm -rf  ./xjcc-dev-ops-web
-put -r D:\WorkSpace\ProjectRepository\Javascript\xjcc-dev-ops-web\xjcc-dev-ops-web
-### 5.备份删除172.26.7.208的之前的部署文件
-rm -rf  /var/www/xjcc-dev-ops-web
-### 6.跳板机复制到远程
-scp -r /home/Mr.g/xjcc-dev-ops-web root@172.26.7.208:/var/www
-xjcc123456
