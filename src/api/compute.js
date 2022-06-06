@@ -1,8 +1,8 @@
 import request from '@/utils/request'
 
-export function addPlaybookConfig(data) {
+export function queryAccountBlockList(data) {
   return request({
-    url: '/dev-ops/PlaybookConfig/add',
+    url: '/compute/Compute/queryAccountBlockList',
     method: 'post',
     data
   })

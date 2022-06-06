@@ -5,49 +5,41 @@ import Layout from '@/layout'
 const computeRouter = {
   path: '/compute',
   component: Layout,
-  redirect: '/compute/application',
-  name: 'ComputeCoin',
+  redirect: '/compute/account',
+  name: 'Compute',
   meta: {
-    title: 'ComputeCoin',
+    title: 'Compute',
     icon: 'nested'
   },
   children: [
     {
-      path: 'idcCenter',
-      component: () => import('@/views/compute/application'), // Parent router-view
-      name: 'IdcCenter',
-      meta: { title: '数据中心机房' },
+      path: 'account',
+      component: () => import('@/views/compute/account'),
+      name: 'Account',
+      meta: { title: '账户' },
       children: [
         {
-          path: 'application',
-          component: () => import('@/views/compute/application'),
-          name: 'Application',
-          meta: { title: '应用' },
-          children: [
-            {
-              path: 'queryPage',
-              component: () => import('@/views/compute/application/queryPage'),
-              name: 'QueryPage',
-              meta: {
-                title: '应用查询',
-                icon: 'qq'
-              }
-            },
-            {
-              path: 'add',
-              component: () => import('@/views/compute/application/add'),
-              name: 'Add',
-              hidden: true,
-              meta: { title: '应用新增' }
-            },
-            {
-              path: 'modify',
-              component: () => import('@/views/compute/application/modify'),
-              name: 'Modify',
-              hidden: true,
-              meta: { title: '应用修改' }
-            }
-          ]
+          path: 'queryPage',
+          component: () => import('@/views/compute/account/queryPage'),
+          name: 'QueryPage',
+          meta: {
+            title: '账户查询',
+            icon: 'search'
+          }
+        },
+        {
+          path: 'add',
+          component: () => import('@/views/compute/account/add'),
+          name: 'Add',
+          hidden: true,
+          meta: { title: '应用新增' }
+        },
+        {
+          path: 'modify',
+          component: () => import('@/views/compute/account/modify'),
+          name: 'Modify',
+          hidden: true,
+          meta: { title: '应用修改' }
         }
       ]
     }
