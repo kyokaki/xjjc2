@@ -1,11 +1,11 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-form :inline="true" :model="listQuery" class="demo-form-inline">
-        <el-form-item label="账户编号" size="mini">
+      <el-form ref="form" :inline="true" :model="listQuery" class="demo-form-inline" :rules="rules">
+        <el-form-item label="账户地址" size="mini" prop="account">
           <el-input
             v-model="listQuery.account"
-            placeholder="账户编号"
+            placeholder="账户地址"
             style="width: 400px"
             class="filter-item"
             @keyup.enter.native="handleFilter"
@@ -46,34 +46,42 @@
         highlight-current-row
         style="width: 100%"
         size="mini"
+        :cell-style="cellStyle"
       >
-        <el-table-column width="300px" align="center" label="from">
+        <el-table-column width="300px" align="center" label="time">
+          <template slot-scope="{ row }">
+            <span>{{ row.mcTime }}</span>
+          </template>
+        </el-table-column>
+
+        <el-table-column
+          width="100px"
+          align="center"
+          label="direction"
+          prop="direction"
+          :filters="[{text: 'Receive', value: 'Receive'}, {text: 'Send', value: 'Send'}]"
+          :filter-method="filterHandler"
+        >
+          <template slot-scope="{ row }">
+            <span>{{ row.from == listQuery.account ? "Send" : "Receive" }}</span>
+          </template>
+        </el-table-column>
+
+        <el-table-column width="300px" align="center" label="from" prop="from">
           <template slot-scope="{ row }">
             <span>{{ row.from }}</span>
           </template>
         </el-table-column>
 
-        <el-table-column width="300px" align="center" label="hash">
+        <el-table-column width="300px" align="center" label="to">
           <template slot-scope="{ row }">
-            <span>{{ row.hash }}</span>
+            <span>{{ row.content ? row.content.to : '' }}</span>
           </template>
         </el-table-column>
 
-        <el-table-column width="300px" align="center" label="signature">
+        <el-table-column width="300px" align="center" label="amount">
           <template slot-scope="{ row }">
-            <span>{{ row.signature }}</span>
-          </template>
-        </el-table-column>
-
-        <el-table-column width="50px" align="center" label="type">
-          <template slot-scope="{ row }">
-            <span>{{ row.type }}</span>
-          </template>
-        </el-table-column>
-
-        <el-table-column width="600px" align="center" label="content">
-          <template slot-scope="{ row }">
-            <span>{{ row.content }}</span>
+            <span>{{ row.content ? row.content.amount :'' }}</span>
           </template>
         </el-table-column>
 
@@ -85,11 +93,9 @@
 <script>
 import { queryAccountBlockList } from '@/api/compute'
 import waves from '@/directive/waves' // waves directive
-import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 
 export default {
   name: 'ComplexTable',
-  components: { Pagination },
   directives: { waves },
   data() {
     return {
@@ -99,14 +105,36 @@ export default {
       listLoading: false,
       listQuery: {
         account: undefined
+      },
+      rules: {
+        account: [{ required: true, trigger: 'blur', message: 'account 必须填写' }]
       }
     }
   },
   created() {
   },
   methods: {
+    filterHandler(value, row, column) {
+      if (value === 'Receive') {
+        return row['from'] !== this.listQuery.account
+      } else if (value === 'Send') {
+        return row['from'] === this.listQuery.account
+      }
+    },
+    cellStyle({ row, column }) {
+      if (row.from && row.from === this.listQuery.account && (column.property === 'from' || column.property === 'direction')) {
+        return {
+          'backgroundColor': '#67C23A',
+          'color': 'white'
+        }
+      }
+    },
     handleFilter() {
-      this.getList()
+      this.$refs['form'].validate(vali => {
+        if (vali) {
+          this.getList()
+        }
+      })
     },
     getList() {
       this.listLoading = true
@@ -122,51 +150,6 @@ export default {
       this.listQuery = {}
       this.listQuery.currentPage = 1
       this.listQuery.pageSize = 5
-    },
-    handleCreate() {
-      this.$router.push({
-        path: '/cmdb/application/add',
-        params: { title: '新增' }
-      })
-    },
-    handleUpdate(row) {
-      const editRow = Object.assign({}, row) // copy obj
-      this.$router.push({
-        path: '/cmdb/application/modify',
-        query: editRow
-      })
-    },
-    handleDelete(row, index) {
-      this.dialogFormVisible = true
-      this.deleteRow = Object.assign({}, row) // copy obj
-      this.deleteIndex = index
-    },
-    onCancel() {
-      this.dialogFormVisible = false
-      this.deleteRow = {}
-      this.deleteIndex = undefined
-      this.confirmLoading = false
-    },
-    onRemove() {
-      this.confirmLoading = true
-      removeApplication(this.deleteRow).then((response) => {
-        const { data } = response
-        console.log('response.data=', data)
-        this.dialogFormVisible = false
-        if (data) {
-          this.$notify({
-            title: '成功',
-            message: '删除成功',
-            type: 'success',
-            duration: 2000
-          })
-          this.list.splice(this.deleteIndex, 1)
-        }
-        // Just to simulate the time of the request
-        setTimeout(() => {
-          this.listLoading = false
-        }, 1.5 * 1000)
-      })
     }
   }
 }
