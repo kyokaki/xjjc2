@@ -75,13 +75,13 @@
 
         <el-table-column width="300px" align="center" label="to">
           <template slot-scope="{ row }">
-            <span>{{ row.content ? row.content.to : '' }}</span>
+            <span>{{ row.to }}</span>
           </template>
         </el-table-column>
 
         <el-table-column width="300px" align="center" label="amount">
           <template slot-scope="{ row }">
-            <span>{{ row.content ? row.content.amount :'' }}</span>
+            <span>{{ row.amount }}</span>
           </template>
         </el-table-column>
 
@@ -139,7 +139,7 @@ export default {
     getList() {
       this.listLoading = true
       queryAccountBlockList(this.listQuery).then((response) => {
-        this.list = response.data.list
+        this.list = response.data
         // Just to simulate the time of the request
         setTimeout(() => {
           this.listLoading = false
