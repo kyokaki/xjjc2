@@ -11,87 +11,87 @@
             @keyup.enter.native="handleFilter"
           />
         </el-form-item>
-        <div>
-          <el-button
-            v-waves
-            class="filter-item"
-            type="primary"
-            icon="el-icon-search"
-            size="mini"
-            @click="handleFilter"
-          >
-            查询
-          </el-button>
-          <el-button
-            class="filter-item"
-            style="margin-left: 10px"
-            type="primary"
-            icon="el-icon-refresh-left"
-            size="mini"
-            @click="onReset"
-          >
-            重置
-          </el-button>
-        </div>
-      </el-form>
-    </div>
-
-    <div>
-      <el-table
-        :key="tableKey"
-        v-loading="listLoading"
-        :data="list"
-        border
-        fit
-        highlight-current-row
-        style="width: 100%"
-        size="mini"
-        :cell-style="cellStyle"
-      >
-        <el-table-column width="300px" align="center" label="time">
-          <template slot-scope="{ row }">
-            <span>{{ row.mcTime }}</span>
-          </template>
-        </el-table-column>
-
-        <el-table-column
-          width="100px"
-          align="center"
-          label="direction"
-          prop="direction"
-          :filters="[{text: 'Receive', value: 'Receive'}, {text: 'Send', value: 'Send'}]"
-          :filter-method="filterHandler"
+        <el-button
+          v-waves
+          class="filter-item"
+          type="primary"
+          icon="el-icon-search"
+          size="mini"
+          @click="handleFilter"
         >
-          <template slot-scope="{ row }">
-            <span>{{ row.from == listQuery.account ? "Send" : "Receive" }}</span>
-          </template>
-        </el-table-column>
+          查询
+        </el-button>
+        <el-button
+          class="filter-item"
+          style="margin-left: 10px"
+          type="primary"
+          icon="el-icon-refresh-left"
+          size="mini"
+          @click="onReset"
+        >
+          重置
+        </el-button>
+      </el-form>
+      <div style="margin-bottom:10px;font-size:16px">
+        <el-tag>余额: </el-tag> <span>{{ accountBalance }}</span>
+      </div>
 
-        <el-table-column width="300px" align="center" label="from" prop="from">
-          <template slot-scope="{ row }">
-            <span>{{ row.from }}</span>
-          </template>
-        </el-table-column>
+      <div>
+        <el-table
+          :key="tableKey"
+          v-loading="listLoading"
+          :data="list"
+          border
+          fit
+          highlight-current-row
+          style="width: 100%"
+          size="mini"
+          :cell-style="cellStyle"
+        >
+          <el-table-column width="300px" align="center" label="time">
+            <template slot-scope="{ row }">
+              <span>{{ row.mcTime }}</span>
+            </template>
+          </el-table-column>
 
-        <el-table-column width="300px" align="center" label="to">
-          <template slot-scope="{ row }">
-            <span>{{ row.to }}</span>
-          </template>
-        </el-table-column>
+          <el-table-column
+            width="100px"
+            align="center"
+            label="direction"
+            prop="direction"
+            :filters="[{text: 'Receive', value: 'Receive'}, {text: 'Send', value: 'Send'}]"
+            :filter-method="filterHandler"
+          >
+            <template slot-scope="{ row }">
+              <span>{{ row.from == listQuery.account ? "Send" : "Receive" }}</span>
+            </template>
+          </el-table-column>
 
-        <el-table-column width="300px" align="center" label="amount">
-          <template slot-scope="{ row }">
-            <span>{{ row.amount }}</span>
-          </template>
-        </el-table-column>
+          <el-table-column width="300px" align="center" label="from" prop="from">
+            <template slot-scope="{ row }">
+              <span>{{ row.from }}</span>
+            </template>
+          </el-table-column>
 
-      </el-table>
+          <el-table-column width="300px" align="center" label="to">
+            <template slot-scope="{ row }">
+              <span>{{ row.to }}</span>
+            </template>
+          </el-table-column>
+
+          <el-table-column width="300px" align="center" label="amount">
+            <template slot-scope="{ row }">
+              <span>{{ row.amount }}</span>
+            </template>
+          </el-table-column>
+
+        </el-table>
+      </div>
     </div>
-  </div>
-</template>
+  </div></template>
 
 <script>
-import { queryAccountBlockList } from '@/api/compute'
+import { queryAccountBlockList, queryAccountBalance } from '@/api/compute'
 import waves from '@/directive/waves' // waves directive
 
 export default {
@@ -106,6 +106,7 @@ export default {
       listQuery: {
         account: undefined
       },
+      accountBalance: null,
       rules: {
         account: [{ required: true, trigger: 'blur', message: 'account 必须填写' }]
       }
@@ -140,6 +141,13 @@ export default {
       this.listLoading = true
       queryAccountBlockList(this.listQuery).then((response) => {
         this.list = response.data
+        // Just to simulate the time of the request
+        setTimeout(() => {
+          this.listLoading = false
+        }, 1.5 * 1000)
+      })
+      queryAccountBalance(this.listQuery).then((response) => {
+        this.accountBalance = response.data
         // Just to simulate the time of the request
         setTimeout(() => {
           this.listLoading = false
