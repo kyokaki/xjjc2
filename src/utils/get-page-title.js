@@ -1,6 +1,6 @@
 import defaultSettings from '@/settings'
 
-const title = defaultSettings.title || '开发运维平台'
+const title = defaultSettings.title || 'Compute'
 
 export default function getPageTitle(pageTitle) {
   if (pageTitle) {

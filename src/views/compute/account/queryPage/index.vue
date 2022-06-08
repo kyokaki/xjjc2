@@ -8,6 +8,7 @@
             placeholder="Account"
             style="width: 400px"
             class="filter-item"
+            :clearable="true"
             @keyup.enter.native="handleFilter"
           />
         </el-form-item>
@@ -37,6 +38,7 @@
           style="width: 100%"
           size="mini"
           :cell-style="cellStyle"
+          empty-text="No data"
         >
           <el-table-column align="center" label="time">
             <template slot-scope="{ row }">
@@ -45,7 +47,6 @@
           </el-table-column>
 
           <el-table-column
-
             align="center"
             label="direction"
             prop="direction"
@@ -53,7 +54,7 @@
             :filter-method="filterHandler"
           >
             <template slot-scope="{ row }">
-              <span>{{ row.from == listQuery.account ? "Send" : "Receive" }}</span>
+              <span>{{ row.direction }}</span>
             </template>
           </el-table-column>
 
@@ -141,7 +142,7 @@ export default {
         // Just to simulate the time of the request
         setTimeout(() => {
           this.listLoading = false
-        }, 1.5 * 1000)
+        }, 0.5 * 1000)
       })
     }
   }

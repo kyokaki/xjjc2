@@ -1,6 +1,6 @@
 module.exports = {
 
-  title: '开发运维平台',
+  title: 'Compute',
 
   /**
    * @type {boolean} true | false
