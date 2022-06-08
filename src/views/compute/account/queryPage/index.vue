@@ -2,10 +2,10 @@
   <div class="app-container">
     <div class="filter-container">
       <el-form ref="form" :inline="true" :model="listQuery" class="demo-form-inline" :rules="rules">
-        <el-form-item label="账户地址" size="mini" prop="account">
+        <el-form-item label="Account" size="mini" prop="account">
           <el-input
             v-model="listQuery.account"
-            placeholder="账户地址"
+            placeholder="Account"
             style="width: 400px"
             class="filter-item"
             @keyup.enter.native="handleFilter"
@@ -19,21 +19,11 @@
           size="mini"
           @click="handleFilter"
         >
-          查询
-        </el-button>
-        <el-button
-          class="filter-item"
-          style="margin-left: 10px"
-          type="primary"
-          icon="el-icon-refresh-left"
-          size="mini"
-          @click="onReset"
-        >
-          重置
+          Query
         </el-button>
       </el-form>
       <div style="margin-bottom:10px;font-size:16px">
-        <el-tag>余额: </el-tag> <span>{{ accountBalance }}</span>
+        <el-tag>Account Balance: </el-tag> <span>{{ accountBalance }}</span>
       </div>
 
       <div>
@@ -48,14 +38,14 @@
           size="mini"
           :cell-style="cellStyle"
         >
-          <el-table-column width="300px" align="center" label="time">
+          <el-table-column align="center" label="time">
             <template slot-scope="{ row }">
               <span>{{ row.mcTime }}</span>
             </template>
           </el-table-column>
 
           <el-table-column
-            width="100px"
+
             align="center"
             label="direction"
             prop="direction"
@@ -67,19 +57,19 @@
             </template>
           </el-table-column>
 
-          <el-table-column width="300px" align="center" label="from" prop="from">
+          <el-table-column align="center" label="from" prop="from">
             <template slot-scope="{ row }">
               <span>{{ row.from }}</span>
             </template>
           </el-table-column>
 
-          <el-table-column width="300px" align="center" label="to">
+          <el-table-column align="center" label="to">
             <template slot-scope="{ row }">
               <span>{{ row.to }}</span>
             </template>
           </el-table-column>
 
-          <el-table-column width="300px" align="center" label="amount">
+          <el-table-column align="center" label="amount">
             <template slot-scope="{ row }">
               <span>{{ row.amount }}</span>
             </template>
@@ -108,7 +98,7 @@ export default {
       },
       accountBalance: null,
       rules: {
-        account: [{ required: true, trigger: 'blur', message: 'account 必须填写' }]
+        account: [{ required: true, trigger: 'blur' }]
       }
     }
   },
@@ -153,11 +143,6 @@ export default {
           this.listLoading = false
         }, 1.5 * 1000)
       })
-    },
-    onReset() {
-      this.listQuery = {}
-      this.listQuery.currentPage = 1
-      this.listQuery.pageSize = 5
     }
   }
 }

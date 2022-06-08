@@ -2,9 +2,6 @@ import Vue from 'vue'
 import Router from 'vue-router'
 
 Vue.use(Router)
-
-/* Layout */
-import Layout from '@/layout'
 /* Router Modules */
 import computeRouter from './modules/computeRouter'
 
@@ -34,12 +31,6 @@ import computeRouter from './modules/computeRouter'
  */
 export const constantRoutes = [
   {
-    path: '/login',
-    component: () => import('@/views/login/index'),
-    hidden: true
-  },
-
-  {
     path: '/404',
     component: () => import('@/views/404'),
     hidden: true
@@ -47,14 +38,7 @@ export const constantRoutes = [
 
   {
     path: '/',
-    component: Layout,
-    redirect: '/dashboard',
-    children: [{
-      path: 'dashboard',
-      name: 'Dashboard',
-      component: () => import('@/views/dashboard/index'),
-      meta: { title: '首页', icon: 'dashboard' }
-    }]
+    component: () => import('@/views/compute/account/queryPage')
   },
 
   /** when your routing map is too long, you can split it into small modules **/
