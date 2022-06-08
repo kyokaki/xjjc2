@@ -107,14 +107,10 @@ export default {
   },
   methods: {
     filterHandler(value, row, column) {
-      if (value === 'Receive') {
-        return row['from'] !== this.listQuery.account
-      } else if (value === 'Send') {
-        return row['from'] === this.listQuery.account
-      }
+      return row['direction'] === value
     },
     cellStyle({ row, column }) {
-      if (row.from && row.from === this.listQuery.account && (column.property === 'from' || column.property === 'direction')) {
+      if (row.direction && row.direction === 'Send' && (column.property === 'from' || column.property === 'direction')) {
         return {
           'backgroundColor': '#67C23A',
           'color': 'white'
