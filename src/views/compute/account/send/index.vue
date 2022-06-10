@@ -99,7 +99,6 @@ export default {
       let sendObjList = []
       try {
         sendObjList = this.getSendObjList()
-        console.log('######sendObjList# ' + sendObjList)
         console.log('#sendObjList# ' + JSON.stringify(sendObjList))
       } catch (error) {
         return this.$message.error('getSendObjList fail ')
@@ -165,7 +164,7 @@ export default {
         const list = item.split(this.separator)
         return {
           to: list[0],
-          amount: list[1] * Math.pow(10, 18)
+          amount: (list[1] * Math.pow(10, 18)).toLocaleString().replace(/,/g, '')
         }
       })
     },
