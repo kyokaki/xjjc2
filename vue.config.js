@@ -37,6 +37,12 @@ module.exports = {
       warnings: false,
       errors: true
     },
+    proxy: {
+      '/': {
+        target: 'https://huygens.computecoin.network/',
+        changOrigin: true
+      }
+    },
     before: require('./mock/mock-server.js')
   },
   configureWebpack: {
