@@ -84,6 +84,7 @@
 <script>
 import { queryAccountBlockList, queryAccountBalance } from '@/api/compute'
 import waves from '@/directive/waves' // waves directive
+import Mcp from 'mcp.js'
 
 export default {
   name: 'ComplexTable',
@@ -104,8 +105,33 @@ export default {
     }
   },
   created() {
+    this.init()
   },
   methods: {
+    init: () => {
+      const mcp = new Mcp('https://huygens.computecoin.network/')
+      console.log('######mcp######' + JSON.stringify(mcp))
+      // mcp.Contract.setProvider("https://huygens.computecoin.network/");
+      // const core = "0x2A6959d2eB8210D6E90Fcf4B8D734946A89da59c";
+      // const Contract = new mcp.Contract(abi, core);
+      // console.log("###Contract###" + JSON.stringify(Contract));
+      mcp.request
+        .accountBalance({
+          account: '0x2a6959d2eb8210d6e90fcf4b8d734946a89da59c'
+        })
+        .then((res) => {
+          console.log('#accountBalance# ' + JSON.stringify(res))
+        })
+      // mcp.accounts
+      //   .create(0x2a6959d2eb8210d6e90fcf4b8d734946a89da59c)
+      //   .then((res) => {
+      //     console.log("Create account result\n", res); //res.account
+      //     console.log(`res.account:${JSON.stringify(res)}`);
+      //   })
+      //   .catch((err) => {
+      //     console.log("err===>", err);
+      //   });
+    },
     filterHandler(value, row, column) {
       return row['direction'] === value
     },
