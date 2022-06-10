@@ -68,6 +68,7 @@
 <script>
 import waves from '@/directive/waves'
 import Mcp from 'mcp.js'
+import moment from 'moment'
 
 export default {
   name: 'Account',
@@ -98,14 +99,23 @@ export default {
       console.log('#receive hashes# ' + hashes)
       const { blocks } = await this.mcp.request.getBlocks(hashes)
       if (blocks?.length > 0) {
-        this.list = blocks.map(block => {
+        this.list = blocks.map(async block => {
+          const stateResult = await this.mcp.request.getBlockState(block.hash)
+          console.log('#receive stateResult# ' + JSON.stringify(stateResult))
+          const mc_timestamp = stateResult?.block_state?.stable_content?.mc_timestamp
+          let time = ''
+          if (mc_timestamp) {
+            time = mc_timestamp ? moment.unix(mc_timestamp).utc().format() : ''
+          }
           return {
             from: block.from,
             to: block?.content?.to,
             hash: block.hash,
-            amount: block?.content?.amount
+            amount: block?.content?.amount,
+            time
           }
         })
+        console.log('#receive list#' + this.list)
       }
     },
     async getAccountBalance() {
