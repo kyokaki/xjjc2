@@ -96,10 +96,11 @@ export default {
       this.getAccountBalance()
     },
     async getBlocks(hashes) {
+      const result = []
       console.log('#receive hashes# ' + hashes)
       const { blocks } = await this.mcp.request.getBlocks(hashes)
       if (blocks?.length > 0) {
-        this.list = blocks.map(async block => {
+        blocks.forEach(async block => {
           const stateResult = await this.mcp.request.getBlockState(block.hash)
           console.log('#receive stateResult# ' + JSON.stringify(stateResult))
           const mc_timestamp = stateResult?.block_state?.stable_content?.mc_timestamp
@@ -107,15 +108,16 @@ export default {
           if (mc_timestamp) {
             time = mc_timestamp ? moment.unix(mc_timestamp).utc().format() : ''
           }
-          return {
+          result.push({
             from: block.from,
             to: block?.content?.to,
             hash: block.hash,
             amount: block?.content?.amount,
             time
-          }
+          })
         })
-        console.log('#receive list#' + this.list)
+        console.log('#receive list#' + result)
+        this.list = result
       }
     },
     async getAccountBalance() {
