@@ -38,7 +38,7 @@ export const constantRoutes = [
 
   {
     path: '/',
-    component: () => import('@/views/compute/account/queryPage')
+    component: () => import('@/views/Layout')
   },
 
   /** when your routing map is too long, you can split it into small modules **/

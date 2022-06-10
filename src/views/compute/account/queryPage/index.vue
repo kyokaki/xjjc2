@@ -86,7 +86,7 @@ import { queryAccountBlockList, queryAccountBalance } from '@/api/compute'
 import waves from '@/directive/waves' // waves directive
 
 export default {
-  name: 'ComplexTable',
+  name: 'Account',
   directives: { waves },
   data() {
     return {
