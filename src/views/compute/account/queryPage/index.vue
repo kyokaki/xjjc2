@@ -1,8 +1,8 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-form ref="form" :inline="true" :model="listQuery" class="demo-form-inline" :rules="rules">
-        <el-form-item label="Account" size="mini" prop="account">
+      <el-form ref="form" :inline="true" :model="listQuery" class="demo-form-inline">
+        <el-form-item v-if="false" label="Account" size="mini" prop="account">
           <el-input
             v-model="listQuery.account"
             placeholder="Account"
@@ -12,16 +12,6 @@
             @keyup.enter.native="handleFilter"
           />
         </el-form-item>
-        <el-button
-          v-waves
-          class="filter-item"
-          type="primary"
-          icon="el-icon-search"
-          size="mini"
-          @click="handleFilter"
-        >
-          Query
-        </el-button>
       </el-form>
       <div style="margin-bottom:10px;font-size:16px">
         <el-tag>Account Balance: </el-tag> <span>{{ accountBalance }}</span>
@@ -46,18 +36,6 @@
             </template>
           </el-table-column>
 
-          <el-table-column
-            align="center"
-            label="direction"
-            prop="direction"
-            :filters="[{text: 'Receive', value: 'Receive'}, {text: 'Send', value: 'Send'}]"
-            :filter-method="filterHandler"
-          >
-            <template slot-scope="{ row }">
-              <span>{{ row.direction }}</span>
-            </template>
-          </el-table-column>
-
           <el-table-column align="center" label="from" prop="from">
             <template slot-scope="{ row }">
               <span>{{ row.from }}</span>
@@ -67,6 +45,12 @@
           <el-table-column align="center" label="to">
             <template slot-scope="{ row }">
               <span>{{ row.to }}</span>
+            </template>
+          </el-table-column>
+
+          <el-table-column align="center" label="hash">
+            <template slot-scope="{ row }">
+              <span>{{ row.hash }}</span>
             </template>
           </el-table-column>
 
@@ -82,12 +66,11 @@
   </div></template>
 
 <script>
-import { queryAccountBlockList, queryAccountBalance } from '@/api/compute'
-import waves from '@/directive/waves' // waves directive
+import waves from '@/directive/waves'
 import Mcp from 'mcp.js'
 
 export default {
-  name: 'ComplexTable',
+  name: 'Account',
   directives: { waves },
   data() {
     return {
@@ -98,37 +81,42 @@ export default {
       listQuery: {
         account: undefined
       },
-      accountBalance: null,
-      rules: {
-        account: [{ required: true, trigger: 'blur' }]
-      }
+      accountBalance: null
     }
   },
   created() {
-    this.init()
+    this.mcp = new Mcp('https://huygens.computecoin.network/')
+    this.$bus.$on('send_account', this.getAccount)
+    this.$bus.$on('query_record', this.queryRecord)
   },
   methods: {
-    init: () => {
-      const mcp = new Mcp('https://huygens.computecoin.network/')
-      console.log('######mcp######' + JSON.stringify(mcp))
-      // mcp.Contract.setProvider("https://huygens.computecoin.network/");
-      // const core = "0x2A6959d2eB8210D6E90Fcf4B8D734946A89da59c";
-      // const Contract = new mcp.Contract(abi, core);
-      // console.log("###Contract###" + JSON.stringify(Contract));
-      mcp.request
-        .accountBalance('0x2a6959d2eb8210d6e90fcf4b8d734946a89da59c')
-        .then((res) => {
-          console.log('#accountBalance# ' + JSON.stringify(res))
+    queryRecord(hashes) {
+      this.getBlocks(hashes)
+      this.getAccountBalance()
+    },
+    async getBlocks(hashes) {
+      console.log('#receive hashes# ' + hashes)
+      const { blocks } = await this.mcp.request.getBlocks(hashes)
+      if (blocks?.length > 0) {
+        this.list = blocks.map(block => {
+          return {
+            from: block.from,
+            to: block?.content?.to,
+            hash: block.hash,
+            amount: block?.content?.amount
+          }
         })
-      // mcp.accounts
-      //   .create(0x2a6959d2eb8210d6e90fcf4b8d734946a89da59c)
-      //   .then((res) => {
-      //     console.log("Create account result\n", res); //res.account
-      //     console.log(`res.account:${JSON.stringify(res)}`);
-      //   })
-      //   .catch((err) => {
-      //     console.log("err===>", err);
-      //   });
+      }
+    },
+    async getAccountBalance() {
+      const { balance } = await this.mcp.request.accountBalance(this.listQuery.account)
+      if (balance) {
+        this.accountBalance = balance
+      }
+    },
+    getAccount(account) {
+      console.log('#receive account# ' + account)
+      this.listQuery.account = account
     },
     filterHandler(value, row, column) {
       return row['direction'] === value
@@ -140,31 +128,12 @@ export default {
           'color': 'white'
         }
       }
-    },
-    handleFilter() {
-      this.$refs['form'].validate(vali => {
-        if (vali) {
-          this.getList()
-        }
-      })
-    },
-    getList() {
-      this.listLoading = true
-      queryAccountBlockList(this.listQuery).then((response) => {
-        this.list = response.data
-        // Just to simulate the time of the request
-        setTimeout(() => {
-          this.listLoading = false
-        }, 1.5 * 1000)
-      })
-      queryAccountBalance(this.listQuery).then((response) => {
-        this.accountBalance = response.data
-        // Just to simulate the time of the request
-        setTimeout(() => {
-          this.listLoading = false
-        }, 0.5 * 1000)
-      })
     }
   }
 }
 </script>
+<style>
+.app-container {
+  padding: 10px;
+}
+</style>
