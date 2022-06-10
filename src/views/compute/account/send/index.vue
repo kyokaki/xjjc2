@@ -135,6 +135,8 @@ export default {
           if (sendResult && sendResult.code === 0) {
             hashs.add(sendResult.hash)
             count++
+          } else if (sendResult && sendResult.code === 11) {
+            return this.$message.error('sendBlock fail ' + sendResult.msg)
           }
         } catch (error) {
           return this.$message.error('sendBlock fail ' + JSON.stringify(this.sendParams))
