@@ -116,9 +116,7 @@ export default {
       // const Contract = new mcp.Contract(abi, core);
       // console.log("###Contract###" + JSON.stringify(Contract));
       mcp.request
-        .accountBalance({
-          account: '0x2a6959d2eb8210d6e90fcf4b8d734946a89da59c'
-        })
+        .accountBalance('0x2a6959d2eb8210d6e90fcf4b8d734946a89da59c')
         .then((res) => {
           console.log('#accountBalance# ' + JSON.stringify(res))
         })
