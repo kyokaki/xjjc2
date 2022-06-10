@@ -21,7 +21,6 @@
   </div></template>
 
 <script>
-import { queryAccountBlockList, queryAccountBalance } from '@/api/compute'
 import waves from '@/directive/waves'
 import Mcp from 'mcp.js'
 
@@ -160,21 +159,6 @@ export default {
     accountImport() {
       const jsonFile = this.form.keystore
       return this.mcp.request.accountImport(jsonFile)
-    },
-    getList() {
-      this.listLoading = true
-      queryAccountBlockList(this.listQuery).then((response) => {
-        this.list = response.data
-        setTimeout(() => {
-          this.listLoading = false
-        }, 1.5 * 1000)
-      })
-      queryAccountBalance(this.listQuery).then((response) => {
-        this.accountBalance = response.data
-        setTimeout(() => {
-          this.listLoading = false
-        }, 0.5 * 1000)
-      })
     }
   }
 }

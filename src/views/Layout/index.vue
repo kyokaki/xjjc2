@@ -5,7 +5,6 @@
       <el-card class="box-card">
         <div slot="header" class="clearfix">
           <span>Batch Split</span>
-          <el-button style="float: right; padding: 3px 0" type="text">待定</el-button>
         </div>
         <Send />
       </el-card>
@@ -13,7 +12,6 @@
       <el-card class="box-card">
         <div slot="header" class="clearfix">
           <span>Split Record</span>
-          <el-button style="float: right; padding: 3px 0" type="text">待定</el-button>
         </div>
         <Query />
       </el-card>
