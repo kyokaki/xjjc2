@@ -3,14 +3,14 @@
     <div class="filter-container">
       <el-form ref="form" :model="form" label-width="200px" size="mini" :rules="rules">
         <el-form-item label="keystore" prop="keystore">
-          <el-input v-model="form.keystore" type="textarea" rows="3" />
+          <el-input v-model="form.keystore" type="textarea" rows="3"/>
         </el-form-item>
         <el-form-item label="password" prop="password">
-          <el-input v-model="form.password" type="password" />
+          <el-input v-model="form.password" type="password"/>
         </el-form-item>
 
         <el-form-item label="sendToAndAmount" prop="sendToAndAmount">
-          <el-input v-model="form.sendToAndAmount" type="textarea" rows="5" />
+          <el-input v-model="form.sendToAndAmount" type="textarea" rows="5"/>
         </el-form-item>
 
         <el-form-item>
@@ -18,7 +18,8 @@
         </el-form-item>
       </el-form>
     </div>
-  </div></template>
+  </div>
+</template>
 
 <script>
 import waves from '@/directive/waves'
@@ -26,13 +27,13 @@ import Mcp from 'mcp.js'
 
 export default {
   name: 'Send',
-  directives: { waves },
+  directives: {waves},
   data() {
     return {
       rules: {
-        keystore: [{ required: true, trigger: 'blur' }],
-        password: [{ required: true, trigger: 'blur' }],
-        sendToAndAmount: [{ required: true, trigger: 'blur' }]
+        keystore: [{required: true, trigger: 'blur'}],
+        password: [{required: true, trigger: 'blur'}],
+        sendToAndAmount: [{required: true, trigger: 'blur'}]
       },
       form: {
         keystore: undefined,
@@ -87,14 +88,18 @@ export default {
       let importResult = {}
       try {
         importResult = await this.accountImport()
-        this.gasParams.from = importResult.account
         console.log('#importResult# ' + JSON.stringify(importResult))
+        if (importResult.code != 0) {
+          return this.$message.error('fail: ' + importResult.msg)
+        }
+        this.gasParams.from = importResult.account
       } catch (e) {
         return this.$message.error('accountImport fail ')
       }
       let sendObjList = []
       try {
         sendObjList = this.getSendObjList()
+        console.log('######sendObjList# ' + sendObjList)
         console.log('#sendObjList# ' + JSON.stringify(sendObjList))
       } catch (error) {
         return this.$message.error('getSendObjList fail ')
@@ -102,13 +107,16 @@ export default {
       let count = 0
       const hashs = new Set()
       const maxCount = sendObjList.length
-      sendObjList.forEach(async(item) => {
+      sendObjList.forEach(async (item) => {
         // 1.查询gas
         let gas = ''
         try {
           const gasResult = await this.estimateGas(item)
           console.log('#gas# ' + JSON.stringify(gasResult))
-          gas = gasResult.gas
+          if (gasResult.code != 0) {
+            return this.$message.error('fail: ' + gasResult.msg)
+          }
+          gas = gasResult.gas;
         } catch (error) {
           return this.$message.error('estimateGas fail ' + JSON.stringify(item))
         }
@@ -121,6 +129,9 @@ export default {
           this.sendParams.password = this.form.password
           const sendResult = await this.sendBlock()
           console.log('#sendResult# ' + JSON.stringify(sendResult))
+          if (sendResult.code != 0) {
+            return this.$message.error('fail: ' + sendResult.msg)
+          }
           if (sendResult && sendResult.code === 0) {
             hashs.add(sendResult.hash)
             count++
