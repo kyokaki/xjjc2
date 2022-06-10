@@ -25,7 +25,7 @@ module.exports = {
    * Detail: https://cli.vuejs.org/config/#publicpath
    */
   publicPath: './',
-  outputDir: './dist/subapps/compute-h5/',
+  outputDir: './dist/',
   assetsDir: 'static',
   indexPath: './index.html',
   lintOnSave: process.env.NODE_ENV === 'development',
