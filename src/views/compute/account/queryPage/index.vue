@@ -36,18 +36,6 @@
             </template>
           </el-table-column>
 
-          <el-table-column
-            align="center"
-            label="direction"
-            prop="direction"
-            :filters="[{text: 'Receive', value: 'Receive'}, {text: 'Send', value: 'Send'}]"
-            :filter-method="filterHandler"
-          >
-            <template slot-scope="{ row }">
-              <span>{{ row.direction }}</span>
-            </template>
-          </el-table-column>
-
           <el-table-column align="center" label="from" prop="from">
             <template slot-scope="{ row }">
               <span>{{ row.from }}</span>
@@ -57,6 +45,12 @@
           <el-table-column align="center" label="to">
             <template slot-scope="{ row }">
               <span>{{ row.to }}</span>
+            </template>
+          </el-table-column>
+
+          <el-table-column align="center" label="hash">
+            <template slot-scope="{ row }">
+              <span>{{ row.hash }}</span>
             </template>
           </el-table-column>
 
@@ -72,8 +66,8 @@
   </div></template>
 
 <script>
-import { queryAccountBlockList, queryAccountBalance } from '@/api/compute'
-import waves from '@/directive/waves' // waves directive
+import waves from '@/directive/waves'
+import Mcp from 'mcp.js'
 
 export default {
   name: 'Account',
@@ -91,10 +85,35 @@ export default {
     }
   },
   created() {
+    this.mcp = new Mcp('https://huygens.computecoin.network/')
     this.$bus.$on('send_account', this.getAccount)
-    this.$bus.$on('query_record', this.getList)
+    this.$bus.$on('query_record', this.queryRecord)
   },
   methods: {
+    queryRecord(hashes) {
+      this.getBlocks(hashes)
+      this.getAccountBalance()
+    },
+    async getBlocks(hashes) {
+      console.log('#receive hashes# ' + hashes)
+      const { blocks } = await this.mcp.request.getBlocks(hashes)
+      if (blocks?.length > 0) {
+        this.list = blocks.map(block => {
+          return {
+            from: block.from,
+            to: block?.content?.to,
+            hash: block.hash,
+            amount: block?.content?.amount
+          }
+        })
+      }
+    },
+    async getAccountBalance() {
+      const { balance } = await this.mcp.request.accountBalance(this.listQuery.account)
+      if (balance) {
+        this.accountBalance = balance
+      }
+    },
     getAccount(account) {
       console.log('#receive account# ' + account)
       this.listQuery.account = account
@@ -109,23 +128,6 @@ export default {
           'color': 'white'
         }
       }
-    },
-    getList() {
-      this.listLoading = true
-      queryAccountBlockList(this.listQuery).then((response) => {
-        this.list = response.data
-        // Just to simulate the time of the request
-        setTimeout(() => {
-          this.listLoading = false
-        }, 1.5 * 1000)
-      })
-      queryAccountBalance(this.listQuery).then((response) => {
-        this.accountBalance = response.data
-        // Just to simulate the time of the request
-        setTimeout(() => {
-          this.listLoading = false
-        }, 0.5 * 1000)
-      })
     }
   }
 }

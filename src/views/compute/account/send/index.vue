@@ -101,6 +101,7 @@ export default {
         return this.$message.error('getSendObjList fail ')
       }
       let count = 0
+      const hashs = new Set()
       const maxCount = sendObjList.length
       sendObjList.forEach(async(item) => {
         // 1.查询gas
@@ -120,16 +121,21 @@ export default {
           this.sendParams.gas = gas
           this.sendParams.password = this.form.password
           const sendResult = await this.sendBlock()
-          console.log('#sendResult# ' + sendResult)
-          count++
+          console.log('#sendResult# ' + JSON.stringify(sendResult))
+          if (sendResult && sendResult.code === 0) {
+            hashs.add(sendResult.hash)
+            count++
+          }
         } catch (error) {
           return this.$message.error('sendBlock fail ' + JSON.stringify(this.sendParams))
         }
       })
       const timer = setInterval(() => {
         if (count >= maxCount) {
-          this.$bus.$emit('query_record')
           clearInterval(timer)
+          setTimeout(() => {
+            this.$bus.$emit('query_record', [...hashs])
+          }, 1000)
         }
       }, 1000)
     },
