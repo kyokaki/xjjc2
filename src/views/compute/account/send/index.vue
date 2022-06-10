@@ -1,20 +1,20 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-form ref="form" :model="form" label-width="200px" size="mini">
-        <el-form-item label="keystore">
+      <el-form ref="form" :model="form" label-width="200px" size="mini" :rules="rules">
+        <el-form-item label="keystore" prop="keystore">
           <el-input v-model="form.keystore" type="textarea" rows="3" />
         </el-form-item>
-        <el-form-item label="password">
+        <el-form-item label="password" prop="password">
           <el-input v-model="form.password" type="password" />
         </el-form-item>
 
-        <el-form-item label="sendToAndAmount">
+        <el-form-item label="sendToAndAmount" prop="sendToAndAmount">
           <el-input v-model="form.sendToAndAmount" type="textarea" rows="5" />
         </el-form-item>
 
         <el-form-item>
-          <el-button type="primary" @click="onSubmit">GO</el-button>
+          <el-button type="primary" @click="handleSubmit">GO</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -30,10 +30,12 @@ export default {
   directives: { waves },
   data() {
     return {
+      rules: {
+        keystore: [{ required: true, trigger: 'blur' }],
+        password: [{ required: true, trigger: 'blur' }],
+        sendToAndAmount: [{ required: true, trigger: 'blur' }]
+      },
       form: {
-        // keystore: undefined,
-        //         password: undefined,
-        // sendToAndAmount: undefined
         keystore: undefined,
         password: undefined,
         sendToAndAmount: undefined
@@ -50,7 +52,7 @@ export default {
       sendParams: {
         from: undefined,
         to: undefined,
-        amount: undefined, // 1 CCN Token
+        amount: undefined,
         password: undefined,
         gas: undefined,
         gas_price: '1000000000',
@@ -58,30 +60,78 @@ export default {
       }
     }
   },
+  watch: {
+    'form.keystore': {
+      handler(newVal, oldVal) {
+        try {
+          const account = JSON.parse(newVal).account
+          this.$bus.$emit('send_account', account)
+        } catch (error) {
+          return this.$message.error('keystore wrong format ')
+        }
+      },
+      deep: true
+    }
+  },
   created() {
     this.mcp = new Mcp('https://huygens.computecoin.network/')
   },
   methods: {
+    handleSubmit() {
+      this.$refs['form'].validate(vali => {
+        if (vali) {
+          this.onSubmit()
+        }
+      })
+    },
     async onSubmit() {
-      const importResult = await this.accountImport()
-      this.gasParams.from = importResult.account
-      console.log('#importResult# ' + JSON.stringify(importResult))
-      const sendObjList = this.getSendObjList()
-      console.log('#sendObjList# ' + JSON.stringify(sendObjList))
+      let importResult = {}
+      try {
+        importResult = await this.accountImport()
+        this.gasParams.from = importResult.account
+        console.log('#importResult# ' + JSON.stringify(importResult))
+      } catch (e) {
+        return this.$message.error('accountImport fail ')
+      }
+      let sendObjList = []
+      try {
+        sendObjList = this.getSendObjList()
+        console.log('#sendObjList# ' + JSON.stringify(sendObjList))
+      } catch (error) {
+        return this.$message.error('getSendObjList fail ')
+      }
+      let count = 0
+      const maxCount = sendObjList.length
       sendObjList.forEach(async(item) => {
         // 1.查询gas
-        const gasResult = await this.estimateGas(item)
-        console.log('#gas# ' + JSON.stringify(gasResult))
-        const gas = gasResult.gas
+        let gas = ''
+        try {
+          const gasResult = await this.estimateGas(item)
+          console.log('#gas# ' + JSON.stringify(gasResult))
+          gas = gasResult.gas
+        } catch (error) {
+          return this.$message.error('estimateGas fail ' + JSON.stringify(item))
+        }
         // 2.开始转账
-        this.sendParams.from = importResult.account
-        this.sendParams.to = item.to
-        this.sendParams.amount = item.amount
-        this.sendParams.gas = gas
-        this.sendParams.password = this.form.password
-        const sendResult = await this.sendBlock()
-        console.log('#sendResult# ' + sendResult)
+        try {
+          this.sendParams.from = importResult.account
+          this.sendParams.to = item.to
+          this.sendParams.amount = item.amount
+          this.sendParams.gas = gas
+          this.sendParams.password = this.form.password
+          const sendResult = await this.sendBlock()
+          console.log('#sendResult# ' + sendResult)
+          count++
+        } catch (error) {
+          return this.$message.error('sendBlock fail ' + JSON.stringify(this.sendParams))
+        }
       })
+      const timer = setInterval(() => {
+        if (count >= maxCount) {
+          this.$bus.$emit('query_record')
+          clearInterval(timer)
+        }
+      }, 1000)
     },
     sendBlock() {
       return this.mcp.request.sendBlock(this.sendParams)
@@ -109,14 +159,12 @@ export default {
       this.listLoading = true
       queryAccountBlockList(this.listQuery).then((response) => {
         this.list = response.data
-        // Just to simulate the time of the request
         setTimeout(() => {
           this.listLoading = false
         }, 1.5 * 1000)
       })
       queryAccountBalance(this.listQuery).then((response) => {
         this.accountBalance = response.data
-        // Just to simulate the time of the request
         setTimeout(() => {
           this.listLoading = false
         }, 0.5 * 1000)

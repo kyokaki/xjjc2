@@ -1,8 +1,8 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-form ref="form" :inline="true" :model="listQuery" class="demo-form-inline" :rules="rules">
-        <el-form-item label="Account" size="mini" prop="account">
+      <el-form ref="form" :inline="true" :model="listQuery" class="demo-form-inline">
+        <el-form-item v-if="false" label="Account" size="mini" prop="account">
           <el-input
             v-model="listQuery.account"
             placeholder="Account"
@@ -12,16 +12,6 @@
             @keyup.enter.native="handleFilter"
           />
         </el-form-item>
-        <el-button
-          v-waves
-          class="filter-item"
-          type="primary"
-          icon="el-icon-search"
-          size="mini"
-          @click="handleFilter"
-        >
-          Query
-        </el-button>
       </el-form>
       <div style="margin-bottom:10px;font-size:16px">
         <el-tag>Account Balance: </el-tag> <span>{{ accountBalance }}</span>
@@ -97,15 +87,18 @@ export default {
       listQuery: {
         account: undefined
       },
-      accountBalance: null,
-      rules: {
-        account: [{ required: true, trigger: 'blur' }]
-      }
+      accountBalance: null
     }
   },
   created() {
+    this.$bus.$on('send_account', this.getAccount)
+    this.$bus.$on('query_record', this.getList)
   },
   methods: {
+    getAccount(account) {
+      console.log('#receive account# ' + account)
+      this.listQuery.account = account
+    },
     filterHandler(value, row, column) {
       return row['direction'] === value
     },
@@ -116,13 +109,6 @@ export default {
           'color': 'white'
         }
       }
-    },
-    handleFilter() {
-      this.$refs['form'].validate(vali => {
-        if (vali) {
-          this.getList()
-        }
-      })
     },
     getList() {
       this.listLoading = true
@@ -144,3 +130,8 @@ export default {
   }
 }
 </script>
+<style>
+.app-container {
+  padding: 10px;
+}
+</style>
