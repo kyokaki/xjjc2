@@ -1,69 +1,76 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-form ref="form" :inline="true" :model="listQuery" class="demo-form-inline">
-        <el-form-item v-if="false" label="Account" size="mini" prop="account">
-          <el-input
-            v-model="listQuery.account"
-            placeholder="Account"
-            style="width: 400px"
-            class="filter-item"
-            :clearable="true"
-            @keyup.enter.native="handleFilter"
-          />
-        </el-form-item>
-      </el-form>
-      <div style="margin-bottom:10px;font-size:16px">
-        <el-tag>Account Balance: </el-tag> <span>{{ accountBalance }}</span>
-      </div>
+      <el-card class="box-card">
+        <div slot="header" class="clearfix">
+          <span>Split Record</span>
+        </div>
+        <el-form ref="form" :inline="true" :model="listQuery" class="demo-form-inline">
+          <el-form-item v-if="false" label="Account" size="mini" prop="account">
+            <el-input
+              v-model="listQuery.account"
+              placeholder="Account"
+              style="width: 400px"
+              class="filter-item"
+              :clearable="true"
+              @keyup.enter.native="handleFilter"
+            />
+          </el-form-item>
+        </el-form>
+        <div style="margin-bottom:10px;font-size:16px">
+          <el-tag>Account Balance: </el-tag> <span>{{ accountBalance }}</span>
+        </div>
 
-      <div>
-        <el-table
-          :key="tableKey"
-          v-loading="listLoading"
-          :data="list"
-          border
-          fit
-          highlight-current-row
-          style="width: 100%"
-          size="mini"
-          :cell-style="cellStyle"
-          empty-text="No data"
-        >
-          <el-table-column align="center" label="time">
-            <template slot-scope="{ row }">
-              <span>{{ row.mcTime }}</span>
-            </template>
-          </el-table-column>
+        <div>
+          <el-table
+            :key="tableKey"
+            v-loading="listLoading"
+            :data="list"
+            border
+            fit
+            highlight-current-row
+            style="width: 100%"
+            size="mini"
+            :cell-style="cellStyle"
+            empty-text="No data"
+          >
+            <el-table-column align="center" label="time">
+              <template slot-scope="{ row }">
+                <span>{{ row.mcTime }}</span>
+              </template>
+            </el-table-column>
 
-          <el-table-column align="center" label="from" prop="from">
-            <template slot-scope="{ row }">
-              <span>{{ row.from }}</span>
-            </template>
-          </el-table-column>
+            <el-table-column align="center" label="from" prop="from">
+              <template slot-scope="{ row }">
+                <span>{{ row.from }}</span>
+              </template>
+            </el-table-column>
 
-          <el-table-column align="center" label="to">
-            <template slot-scope="{ row }">
-              <span>{{ row.to }}</span>
-            </template>
-          </el-table-column>
+            <el-table-column align="center" label="to">
+              <template slot-scope="{ row }">
+                <span>{{ row.to }}</span>
+              </template>
+            </el-table-column>
 
-          <el-table-column align="center" label="hash">
-            <template slot-scope="{ row }">
-              <span>{{ row.hash }}</span>
-            </template>
-          </el-table-column>
+            <el-table-column align="center" label="hash">
+              <template slot-scope="{ row }">
+                <span>{{ row.hash }}</span>
+              </template>
+            </el-table-column>
 
-          <el-table-column align="center" label="amount">
-            <template slot-scope="{ row }">
-              <span>{{ row.amount }}</span>
-            </template>
-          </el-table-column>
+            <el-table-column align="center" label="amount">
+              <template slot-scope="{ row }">
+                <span>{{ row.amount }}</span>
+              </template>
+            </el-table-column>
 
-        </el-table>
-      </div>
+          </el-table>
+        </div>
+      </el-card>
+
     </div>
-  </div></template>
+  </div>
+</template>
 
 <script>
 import waves from '@/directive/waves'

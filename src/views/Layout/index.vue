@@ -1,20 +1,11 @@
 <template>
   <el-container>
-    <!-- <el-header>xxx待定...</el-header> -->
     <el-main>
-      <el-card class="box-card">
-        <div slot="header" class="clearfix">
-          <span>Batch Split</span>
-        </div>
-        <Send />
-      </el-card>
+      <Auth />
 
-      <el-card class="box-card">
-        <div slot="header" class="clearfix">
-          <span>Split Record</span>
-        </div>
-        <Query />
-      </el-card>
+      <Send />
+      <Query />
+
     </el-main>
   </el-container>
 </template>
@@ -22,11 +13,21 @@
 <script>
 import Query from '@/views/compute/account/queryPage'
 import Send from '@/views/compute/account/send'
+import Auth from '@/views/compute/account/auth'
 export default {
   name: 'Layout',
   components: {
     Query,
-    Send
+    Send,
+    Auth
+  },
+  data() {
+    return {
+
+    }
+  },
+  methods: {
+
   }
 
 }
@@ -41,4 +42,15 @@ export default {
 .el-card {
   margin-bottom: 10px;
 }
+.clearfix:before,
+  .clearfix:after {
+    display: table;
+    content: "";
+  }
+  .clearfix:after {
+    clear: both
+  }
+  .box-card {
+    padding: 10px;
+  }
 </style>

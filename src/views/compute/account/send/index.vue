@@ -1,22 +1,84 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-form ref="form" :model="form" label-width="200px" size="mini" :rules="rules">
-        <el-form-item label="keystore" prop="keystore">
-          <el-input v-model="form.keystore" type="textarea" rows="3"/>
-        </el-form-item>
-        <el-form-item label="password" prop="password">
-          <el-input v-model="form.password" type="password"/>
-        </el-form-item>
+      <el-card class="box-card">
+        <div slot="header" class="clearfix">
+          <span>Batch Split</span>
+        </div>
+        <el-tabs tab-position="top">
+          <el-tab-pane label="Manually Split">
+            <el-form ref="form" :model="form" size="mini" :rules="rules" content="Top Left 提示文字">
 
-        <el-form-item label="sendToAndAmount" prop="sendToAndAmount">
-          <el-input v-model="form.sendToAndAmount" type="textarea" rows="5"/>
-        </el-form-item>
+              <el-form-item label="SendTo And Amount" prop="sendToAndAmount">
+                <el-popover
+                  placement="top-start"
+                  title="Tip"
+                  width="200"
+                  trigger="hover"
+                  :content="popoverContent"
+                >
+                  <span slot="reference" class="el-icon-warning-outline" />
+                </el-popover>
+                <el-input v-model="form.sendToAndAmount" type="textarea" rows="5" />
+              </el-form-item>
 
-        <el-form-item>
-          <el-button type="primary" @click="handleSubmit">GO</el-button>
-        </el-form-item>
-      </el-form>
+            </el-form>
+          </el-tab-pane>
+          <el-tab-pane label="Excel Import">
+            EXCEL_IMPORT
+          </el-tab-pane>
+        </el-tabs>
+      </el-card>
+
+      <el-card v-show="preViewList.length > 0" class="box-card">
+        <div slot="header" class="clearfix">
+          <span>Batch  Preview</span>
+        </div>
+        <div>
+          <el-table
+            :key="tableKey"
+            v-loading="listLoading"
+            :data="preViewList"
+            border
+            fit
+            highlight-current-row
+            style="width: 100%"
+            size="mini"
+            empty-text="No data"
+          >
+
+            <el-table-column align="center" label="from" prop="from">
+              <template slot-scope="{ row }">
+                <span>{{ row.from }}</span>
+              </template>
+            </el-table-column>
+
+            <el-table-column align="center" label="to">
+              <template slot-scope="{ row }">
+                <span>{{ row.to }}</span>
+              </template>
+            </el-table-column>
+
+            <el-table-column align="center" label="amount">
+              <template slot-scope="{ row }">
+                <span>{{ row.amount }}</span>
+              </template>
+            </el-table-column>
+
+          </el-table>
+          <el-form>
+            <el-form-item
+              style="
+    margin: 10px auto;
+    text-align: center;
+"
+            >
+              <el-button type="primary" @click="handleSubmit">GO</el-button>
+            </el-form-item>
+          </el-form>
+
+        </div>
+      </el-card>
     </div>
   </div>
 </template>
@@ -24,22 +86,22 @@
 <script>
 import waves from '@/directive/waves'
 import Mcp from 'mcp.js'
-
+import { mapGetters } from 'vuex'
 export default {
   name: 'Send',
-  directives: {waves},
+  directives: { waves },
   data() {
     return {
       rules: {
-        keystore: [{required: true, trigger: 'blur'}],
-        password: [{required: true, trigger: 'blur'}],
-        sendToAndAmount: [{required: true, trigger: 'blur'}]
+        sendToAndAmount: [{ required: true, trigger: 'blur' }]
       },
+      confirmLoading: false,
+      tableKey: 0,
+      listLoading: false,
       form: {
-        keystore: undefined,
-        password: undefined,
         sendToAndAmount: undefined
       },
+      list: [],
       mcp: undefined,
       separator: '::,::',
       gasParams: {
@@ -57,20 +119,17 @@ export default {
         gas: undefined,
         gas_price: '1000000000',
         data: ''
-      }
+      },
+      popoverContent: `Manually Split format reference: \n Recipient\'s account::,::Specific amount`
     }
   },
-  watch: {
-    'form.keystore': {
-      handler(newVal, oldVal) {
-        try {
-          const account = JSON.parse(newVal).account
-          this.$bus.$emit('send_account', account)
-        } catch (error) {
-          return this.$message.error('keystore wrong format ')
-        }
-      },
-      deep: true
+  computed: {
+    ...mapGetters({
+      keystore: 'keystore',
+      keystorePwd: 'keystorePwd'
+    }),
+    preViewList: function() {
+      return this.getSendObjList() || []
     }
   },
   created() {
@@ -85,50 +144,28 @@ export default {
       })
     },
     async onSubmit() {
-      let importResult = {}
-      try {
-        importResult = await this.accountImport()
-        console.log('#importResult# ' + JSON.stringify(importResult))
-        if (importResult.code != 0) {
-          return this.$message.error('fail: ' + importResult.msg)
-        }
-        this.gasParams.from = importResult.account
-      } catch (e) {
-        return this.$message.error('accountImport fail ')
-      }
-      let sendObjList = []
-      try {
-        sendObjList = this.getSendObjList()
-        console.log('#sendObjList# ' + JSON.stringify(sendObjList))
-      } catch (error) {
-        return this.$message.error('getSendObjList fail ')
-      }
+      const sendObjList = this.preViewList
       let count = 0
       const hashs = new Set()
       const maxCount = sendObjList.length
-      sendObjList.forEach(async (item) => {
+      sendObjList.forEach(async(item) => {
         // 1.查询gas
         let gas = ''
         try {
           const gasResult = await this.estimateGas(item)
           console.log('#gas# ' + JSON.stringify(gasResult))
-          if (gasResult.code != 0) {
+          if (gasResult.code !== 0) {
             return this.$message.error('fail: ' + gasResult.msg)
           }
-          gas = gasResult.gas;
+          gas = gasResult.gas
         } catch (error) {
           return this.$message.error('estimateGas fail ' + JSON.stringify(item))
         }
         // 2.开始转账
         try {
-          this.sendParams.from = importResult.account
-          this.sendParams.to = item.to
-          this.sendParams.amount = item.amount
-          this.sendParams.gas = gas
-          this.sendParams.password = this.form.password
-          const sendResult = await this.sendBlock()
+          const sendResult = await this.sendBlock(item, gas)
           console.log('#sendResult# ' + JSON.stringify(sendResult))
-          if (sendResult.code != 0) {
+          if (sendResult.code !== 0) {
             return this.$message.error('fail: ' + sendResult.msg)
           }
           if (sendResult && sendResult.code === 0) {
@@ -150,28 +187,43 @@ export default {
         }
       }, 1000)
     },
-    sendBlock() {
+    sendBlock(item, gas) {
+      this.sendParams.from = JSON.parse(this?.keystore)?.account
+      this.sendParams.to = item.to
+      this.sendParams.amount = item.amount
+      this.sendParams.gas = gas
+      this.sendParams.password = this.keystorePwd
       return this.mcp.request.sendBlock(this.sendParams)
     },
     estimateGas(req) {
+      this.gasParams.from = req.from
       this.gasParams.to = req.to
       this.gasParams.amount = req.amount + ''
       console.log('#this.gasParams#' + JSON.stringify(this.gasParams))
       return this.mcp.request.estimateGas(this.gasParams)
     },
     getSendObjList() {
-      return this.form.sendToAndAmount.split(/\s+/).map((item) => {
-        const list = item.split(this.separator)
-        return {
-          to: list[0],
-          amount: (list[1] * Math.pow(10, 18)).toLocaleString().replace(/,/g, '')
-        }
-      })
-    },
-    accountImport() {
-      const jsonFile = this.form.keystore
-      return this.mcp.request.accountImport(jsonFile)
+      if (this.form?.sendToAndAmount?.trim().length > 0 && this.form?.sendToAndAmount.indexOf(this.separator) > 0) {
+        return this.form?.sendToAndAmount?.trim().split(/\s+/).map((item) => {
+          const list = item.split(this.separator)
+          return {
+            to: list[0],
+            amount: (list[1] * Math.pow(10, 18)).toLocaleString().replace(/,/g, ''),
+            from: JSON.parse(this?.keystore)?.account
+          }
+        })
+      }
     }
   }
 }
 </script>
+<style scoped>
+.filter-container {
+  display: flex;
+}
+.box-card {
+  width: 50%;
+  min-height: 350px;
+  flex:1;
+}
+</style>
