@@ -78,7 +78,7 @@ import Mcp from 'mcp.js'
 import moment from 'moment'
 
 export default {
-  name: 'Account',
+  name: 'Query',
   directives: { waves },
   data() {
     return {

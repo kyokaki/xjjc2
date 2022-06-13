@@ -11,7 +11,7 @@
 </template>
 
 <script>
-import Query from '@/views/compute/account/queryPage'
+import Query from '@/views/compute/account/query'
 import Send from '@/views/compute/account/send'
 import Auth from '@/views/compute/account/auth'
 export default {

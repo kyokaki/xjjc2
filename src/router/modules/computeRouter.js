@@ -19,9 +19,9 @@ const computeRouter = {
       meta: { title: '账户' },
       children: [
         {
-          path: 'queryPage',
-          component: () => import('@/views/compute/account/queryPage'),
-          name: 'QueryPage',
+          path: 'query',
+          component: () => import('@/views/compute/account/query'),
+          name: 'Query',
           meta: {
             title: '转账记录查询',
             icon: 'search'

@@ -7,7 +7,7 @@
         </div>
         <el-tabs tab-position="top">
           <el-tab-pane label="Manually Split">
-            <el-form ref="form" :model="form" size="mini" :rules="rules" content="Top Left 提示文字">
+            <el-form ref="form" :model="form" size="mini" content="Top Left 提示文字">
 
               <el-form-item label="SendTo And Amount" prop="sendToAndAmount">
                 <el-popover
@@ -26,6 +26,7 @@
           </el-tab-pane>
           <el-tab-pane label="Excel Import">
             EXCEL_IMPORT
+            <upload-excel-component :on-success="handleSuccess" :before-upload="beforeUpload" />
           </el-tab-pane>
         </el-tabs>
       </el-card>
@@ -68,10 +69,7 @@
           </el-table>
           <el-form>
             <el-form-item
-              style="
-    margin: 10px auto;
-    text-align: center;
-"
+              style="margin: 10px auto; text-align: center;"
             >
               <el-button type="primary" @click="handleSubmit">GO</el-button>
             </el-form-item>
@@ -86,15 +84,16 @@
 <script>
 import waves from '@/directive/waves'
 import Mcp from 'mcp.js'
+import UploadExcelComponent from '@/components/UploadExcel/index.vue'
 import { mapGetters } from 'vuex'
 export default {
   name: 'Send',
   directives: { waves },
+  components: {
+    UploadExcelComponent
+  },
   data() {
     return {
-      rules: {
-        sendToAndAmount: [{ required: true, trigger: 'blur' }]
-      },
       confirmLoading: false,
       tableKey: 0,
       listLoading: false,
@@ -120,7 +119,9 @@ export default {
         gas_price: '1000000000',
         data: ''
       },
-      popoverContent: `Manually Split format reference: \n Recipient\'s account::,::Specific amount`
+      popoverContent: `Manually Split format reference: \n Recipient\'s account::,::Specific amount`,
+      tableData: [],
+      sendObjList: []
     }
   },
   computed: {
@@ -136,19 +137,45 @@ export default {
     this.mcp = new Mcp('https://huygens.computecoin.network/')
   },
   methods: {
+    beforeUpload(file) {
+      const isLt1M = file.size / 1024 / 1024 < 1
+
+      if (isLt1M) {
+        return true
+      }
+
+      this.$message({
+        message: 'Please do not upload files larger than 1m in size.',
+        type: 'warning'
+      })
+      return false
+    },
+    handleSuccess({ results, header }) {
+      this.tableData = [...results]
+    },
     handleSubmit() {
       this.$refs['form'].validate(vali => {
         if (vali) {
-          this.onSubmit()
+          this.$confirm('This operation will initiate a batch transfer, whether to continue?', 'Warning', {
+            confirmButtonText: 'Sure',
+            cancelButtonText: 'Cancel',
+            type: 'warning'
+          }).then(() => {
+            this.onSubmit()
+          }).catch(() => {
+            this.$message({
+              type: 'info',
+              message: 'Cancelled'
+            })
+          })
         }
       })
     },
     async onSubmit() {
-      const sendObjList = this.preViewList
       let count = 0
       const hashs = new Set()
-      const maxCount = sendObjList.length
-      sendObjList.forEach(async(item) => {
+      const maxCount = this.preViewList.length
+      this.preViewList.forEach(async(item) => {
         // 1.查询gas
         let gas = ''
         try {
@@ -182,6 +209,7 @@ export default {
         if (count >= maxCount) {
           clearInterval(timer)
           setTimeout(() => {
+            this.clearSendObjList()
             this.$bus.$emit('query_record', [...hashs])
           }, 1000)
         }
@@ -190,29 +218,55 @@ export default {
     sendBlock(item, gas) {
       this.sendParams.from = JSON.parse(this?.keystore)?.account
       this.sendParams.to = item.to
-      this.sendParams.amount = item.amount
+      // this.sendParams.amount = item.amount
+      this.sendParams.amount = this.formatAmount(item.amount)
       this.sendParams.gas = gas
       this.sendParams.password = this.keystorePwd
       return this.mcp.request.sendBlock(this.sendParams)
     },
+    formatAmount(amount) {
+      return (amount * Math.pow(10, 18)).toLocaleString().replace(/,/g, '')
+    },
     estimateGas(req) {
       this.gasParams.from = req.from
       this.gasParams.to = req.to
-      this.gasParams.amount = req.amount + ''
+      this.gasParams.amount = this.formatAmount(req.amount + '')
       console.log('#this.gasParams#' + JSON.stringify(this.gasParams))
       return this.mcp.request.estimateGas(this.gasParams)
     },
-    getSendObjList() {
-      if (this.form?.sendToAndAmount?.trim().length > 0 && this.form?.sendToAndAmount.indexOf(this.separator) > 0) {
-        return this.form?.sendToAndAmount?.trim().split(/\s+/).map((item) => {
-          const list = item.split(this.separator)
-          return {
-            to: list[0],
-            amount: (list[1] * Math.pow(10, 18)).toLocaleString().replace(/,/g, ''),
-            from: JSON.parse(this?.keystore)?.account
-          }
-        })
+    handleCheck() {
+      let newArray = []
+      if (this.tableData?.length > 0) {
+        newArray = [...this.tableData]
       }
+      if (this.sendObjList?.length > 0) {
+        newArray = [...newArray, ...this.sendObjList]
+      }
+      return newArray.map(item => { return { ...item, from: JSON.parse(this?.keystore)?.account } })
+    },
+    getSendObjList() {
+      if (this.form?.sendToAndAmount?.trim().length > 0) {
+        if (!this?.keystore) {
+          this.$message.error('Please Account Authentication')
+          return []
+        }
+        if (this.form?.sendToAndAmount.indexOf(this.separator) > 0) {
+          this.sendObjList = this.form?.sendToAndAmount?.trim().split(/\s+/).map(item => {
+            const list = item.split(this.separator)
+            return {
+              to: list[0],
+              amount: list[1]
+            }
+          })
+        }
+      } else {
+        this.sendObjList = []
+      }
+      return this.handleCheck()
+    },
+    clearSendObjList() {
+      this.form.sendToAndAmount = undefined
+      this.tableData = []
     }
   }
 }
