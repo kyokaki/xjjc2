@@ -3,7 +3,7 @@
     <div class="filter-container">
       <el-card class="box-card">
         <div slot="header" class="clearfix">
-          <span>Split Record</span>
+          <span>Transfer Record</span>
         </div>
         <el-form ref="form" :inline="true" :model="listQuery" class="demo-form-inline">
           <el-form-item v-if="false" label="Account" size="mini" prop="account">

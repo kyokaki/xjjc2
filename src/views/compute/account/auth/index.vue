@@ -7,7 +7,7 @@
         </div>
         <el-form ref="form" :model="form" size="mini" :rules="rules" label-position="left" :disabled="disabledFlag">
           <el-form-item label="keystore" prop="keystore">
-            <el-input v-model="form.keystore" type="textarea" rows="3" />
+            <el-input v-model="form.keystore" type="textarea" rows="3" :placeholder="keystorePlaceholder" />
           </el-form-item>
           <el-form-item label="keystore password" prop="password">
             <el-input v-model="form.password" type="password" />
@@ -41,7 +41,8 @@ export default {
         password: undefined
       },
       mcp: undefined,
-      disabledFlag: false
+      disabledFlag: false,
+      keystorePlaceholder: '{"account":"0x2A6959d2eB8210D6E90Fcf4B8D734946A8xxxxxx","kdf_salt":"43DE10873AF07430E58C7A9300xxxxxx","iv":"F0016405DEB5FE645C8C4AE33Exxxxxx","ciphertext":"06D9CBC5EE7F486264A4F841525A701A85F9DA53A0EE2CAFA0C998E7ACxxxxxx"}'
     }
   },
   created() {

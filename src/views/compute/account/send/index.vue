@@ -3,23 +3,29 @@
     <div class="filter-container">
       <el-card class="box-card">
         <div slot="header" class="clearfix">
-          <span>Batch Split</span>
+          <span>Batch Transfer</span>
         </div>
         <el-tabs tab-position="top">
-          <el-tab-pane label="Manually Split">
+          <el-tab-pane label="Text Input">
             <el-form ref="form" :model="form" size="mini" content="Top Left 提示文字">
 
               <el-form-item label="SendTo And Amount" prop="sendToAndAmount">
                 <el-popover
                   placement="top-start"
-                  title="Tip"
+                  title="Separator"
                   width="200"
                   trigger="hover"
                   :content="popoverContent"
                 >
                   <span slot="reference" class="el-icon-warning-outline" />
                 </el-popover>
-                <el-input v-model="form.sendToAndAmount" type="textarea" rows="5" />
+                <el-input
+                  v-model="form.sendToAndAmount"
+                  type="textarea"
+                  rows="5"
+                  placeholder="0x55f3508d1F4B0BE50677245C2018713737xxxxxx::,::0.001
+0x55f3508d1F4B0BE50677245C2018713737xxxxxx::,::200"
+                />
               </el-form-item>
 
             </el-form>
@@ -118,7 +124,8 @@ export default {
         gas_price: '1000000000',
         data: ''
       },
-      popoverContent: `Manually Split format reference: \n Recipient\'s account::,::Specific amount`,
+      popoverContent: `ExampleAccount1::,::0.01
+ExampleAccount2::,::1200`,
       tableData: [],
       sendObjList: []
     }
