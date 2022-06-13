@@ -31,6 +31,9 @@
             </el-form>
           </el-tab-pane>
           <el-tab-pane label="Excel Import">
+            <el-link type="primary">
+              <a href=" /batch_transfer_excel_template.xlsx " class="excel-template">模板下载：batch_transfer_excel_template.xlsx</a>
+            </el-link>
             <upload-excel-component :on-success="handleSuccess" :before-upload="beforeUpload" />
           </el-tab-pane>
         </el-tabs>
@@ -286,5 +289,8 @@ ExampleAccount2::,::1200`,
   width: 50%;
   min-height: 350px;
   flex:1;
+}
+.excel-template {
+  font-size: 14px
 }
 </style>
