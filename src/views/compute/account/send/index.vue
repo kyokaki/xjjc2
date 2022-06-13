@@ -7,9 +7,9 @@
         </div>
         <el-tabs tab-position="top">
           <el-tab-pane label="Text Input">
-            <el-form ref="form" :model="form" size="mini" content="Top Left 提示文字">
+            <el-form ref="form" :model="form" size="mini" content="Top Left Tip Word">
 
-              <el-form-item label="SendAddress::,::Amount" prop="sendToAndAmount">
+              <el-form-item label="ToAddress::,::Amount" prop="sendToAndAmount">
                 <el-popover
                   placement="top-start"
                   title="Separator"
