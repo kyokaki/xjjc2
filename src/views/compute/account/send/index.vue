@@ -9,7 +9,7 @@
           <el-tab-pane label="Text Input">
             <el-form ref="form" :model="form" size="mini" content="Top Left 提示文字">
 
-              <el-form-item label="SendTo And Amount" prop="sendToAndAmount">
+              <el-form-item label="SendAddress::,::Amount" prop="sendToAndAmount">
                 <el-popover
                   placement="top-start"
                   title="Separator"
@@ -23,8 +23,8 @@
                   v-model="form.sendToAndAmount"
                   type="textarea"
                   rows="5"
-                  placeholder="0x55f3508d1F4B0BE50677245C2018713737xxxxxx::,::0.001
-0x55f3508d1F4B0BE50677245C2018713737xxxxxx::,::200"
+                  placeholder="0x55f3508d1F4B0BE50677245C20187xxxxxx13737::,::0.001
+0x55f3508d1F4B0BE50677245C201xxxxxx8713737::,::200"
                 />
               </el-form-item>
 
@@ -32,7 +32,7 @@
           </el-tab-pane>
           <el-tab-pane label="Excel Import">
             <el-link type="primary">
-              <a href=" ./batch_transfer_excel_template.xlsx " class="excel-template">模板下载：batch_transfer_excel_template.xlsx</a>
+              <a href=" ./batch_transfer_excel_template.xlsx " class="excel-template">Excel Template Download：batch_transfer_excel_template.xlsx</a>
             </el-link>
             <upload-excel-component :on-success="handleSuccess" :before-upload="beforeUpload" />
           </el-tab-pane>
