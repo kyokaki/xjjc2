@@ -17,9 +17,9 @@
             />
           </el-form-item>
         </el-form>
-        <div style="margin-bottom:10px;font-size:16px">
+        <!-- <div style="margin-bottom:10px;font-size:16px">
           <el-tag>Account Balance: </el-tag> <span>{{ accountBalance }}</span>
-        </div>
+        </div> -->
 
         <div>
           <el-table
@@ -34,11 +34,11 @@
             :cell-style="cellStyle"
             empty-text="No data"
           >
-            <el-table-column align="center" label="time">
+            <!-- <el-table-column align="center" label="time">
               <template slot-scope="{ row }">
                 <span>{{ row.mcTime }}</span>
               </template>
-            </el-table-column>
+            </el-table-column> -->
 
             <el-table-column align="center" label="from" prop="from">
               <template slot-scope="{ row }">
@@ -76,6 +76,8 @@
 import waves from '@/directive/waves'
 import Mcp from 'mcp.js'
 import moment from 'moment'
+import { getCurrentTime } from '@/utils/date-time'
+import { export_json_to_excel } from '@/excel/export2Excel'
 
 export default {
   name: 'Query',
@@ -89,7 +91,25 @@ export default {
       listQuery: {
         account: undefined
       },
-      accountBalance: null
+      accountBalance: null,
+      splitRecordExcelMapping: [
+        {
+          text: 'from',
+          value: 'from'
+        },
+        {
+          text: 'to',
+          value: 'to'
+        },
+        {
+          text: 'hash',
+          value: 'hash'
+        },
+        {
+          text: 'amount',
+          value: 'amount'
+        }
+      ]
     }
   },
   created() {
@@ -98,15 +118,28 @@ export default {
     this.$bus.$on('query_record', this.queryRecord)
   },
   methods: {
+    exportExcel() {
+      const excelName = 'Split Record' + '-' + getCurrentTime()
+      const tHeader = this.splitRecordExcelMapping.map((item) => item.text)
+      const filterVal = this.splitRecordExcelMapping.map(
+        (item) => item.value
+      )
+      debugger
+      const data = this.formatJson(filterVal, this.list)
+      export_json_to_excel(tHeader, data, excelName)
+    },
+    formatJson(filterVal, jsonData) {
+      return jsonData.map((v) => filterVal.map((j) => v[j]))
+    },
     queryRecord(hashes) {
       this.getBlocks(hashes)
-      this.getAccountBalance()
     },
     async getBlocks(hashes) {
       const result = []
       console.log('#receive hashes# ' + hashes)
       const { blocks } = await this.mcp.request.getBlocks(hashes)
       if (blocks?.length > 0) {
+        debugger
         blocks.forEach(async block => {
           const stateResult = await this.mcp.request.getBlockState(block.hash)
           console.log('#receive stateResult# ' + JSON.stringify(stateResult))
@@ -123,8 +156,10 @@ export default {
             time
           })
         })
+        debugger
         console.log('#receive list#' + result)
         this.list = result
+        this.exportExcel()
       }
     },
     async getAccountBalance() {

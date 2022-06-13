@@ -25,7 +25,6 @@
             </el-form>
           </el-tab-pane>
           <el-tab-pane label="Excel Import">
-            EXCEL_IMPORT
             <upload-excel-component :on-success="handleSuccess" :before-upload="beforeUpload" />
           </el-tab-pane>
         </el-tabs>
@@ -210,6 +209,7 @@ export default {
           clearInterval(timer)
           setTimeout(() => {
             this.clearSendObjList()
+            this.$bus.$emit('send_account', JSON.parse(this?.keystore)?.account)
             this.$bus.$emit('query_record', [...hashs])
           }, 1000)
         }
@@ -236,11 +236,11 @@ export default {
     },
     handleCheck() {
       let newArray = []
-      if (this.tableData?.length > 0) {
-        newArray = [...this.tableData]
-      }
       if (this.sendObjList?.length > 0) {
-        newArray = [...newArray, ...this.sendObjList]
+        newArray = [...this.sendObjList]
+      }
+      if (this.tableData?.length > 0) {
+        newArray = [...newArray, ...this.tableData]
       }
       return newArray.map(item => { return { ...item, from: JSON.parse(this?.keystore)?.account } })
     },
