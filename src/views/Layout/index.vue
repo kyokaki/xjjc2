@@ -1,3 +1,11 @@
+<!--
+ * @Description:
+ * @Author: Liyajun
+ * @Date: 2022-06-10 17:24:50
+ * @FilePath: \compute-h5\src\views\Layout\index.vue
+ * @LastEditTime: 2022-06-13 17:18:08
+ * @LastEditors: Liyajun
+-->
 <template>
   <el-container>
     <el-main>
@@ -35,7 +43,6 @@ export default {
 
 <style>
 .el-container {
-  width: 80%;
   background: rgb(244, 244, 245);
   margin: 0 auto
 }

@@ -119,7 +119,7 @@ export default {
   },
   methods: {
     exportExcel() {
-      const excelName = 'Split Record' + '-' + getCurrentTime()
+      const excelName = 'batch_transfer_result' + '_' + getCurrentTime()
       const tHeader = this.splitRecordExcelMapping.map((item) => item.text)
       const filterVal = this.splitRecordExcelMapping.map(
         (item) => item.value
