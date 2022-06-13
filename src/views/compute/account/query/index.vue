@@ -86,7 +86,7 @@ export default {
     return {
       confirmLoading: false,
       tableKey: 0,
-      list: null,
+      list: [],
       listLoading: false,
       listQuery: {
         account: undefined
@@ -124,7 +124,6 @@ export default {
       const filterVal = this.splitRecordExcelMapping.map(
         (item) => item.value
       )
-      debugger
       const data = this.formatJson(filterVal, this.list)
       export_json_to_excel(tHeader, data, excelName)
     },
@@ -135,11 +134,9 @@ export default {
       this.getBlocks(hashes)
     },
     async getBlocks(hashes) {
-      const result = []
       console.log('#receive hashes# ' + hashes)
       const { blocks } = await this.mcp.request.getBlocks(hashes)
       if (blocks?.length > 0) {
-        debugger
         blocks.forEach(async block => {
           const stateResult = await this.mcp.request.getBlockState(block.hash)
           console.log('#receive stateResult# ' + JSON.stringify(stateResult))
@@ -148,18 +145,18 @@ export default {
           if (mc_timestamp) {
             time = mc_timestamp ? moment.unix(mc_timestamp).utc().format() : ''
           }
-          result.push({
+          this.list.push({
             from: block.from,
             to: block?.content?.to,
             hash: block.hash,
             amount: block?.content?.amount,
             time
           })
+          console.log('#receive list#' + this.list)
+          if (blocks?.length === this.list.length) {
+            this.exportExcel()
+          }
         })
-        debugger
-        console.log('#receive list#' + result)
-        this.list = result
-        this.exportExcel()
       }
     },
     async getAccountBalance() {
