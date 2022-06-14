@@ -1,6 +1,6 @@
 module.exports = {
 
-  title: 'Compute',
+  title: 'Computecoin Batch Transfer Tool',
 
   /**
    * @type {boolean} true | false

@@ -31,7 +31,6 @@
             highlight-current-row
             style="width: 100%"
             size="mini"
-            :cell-style="cellStyle"
             empty-text="No data"
           >
             <!-- <el-table-column align="center" label="time">
@@ -92,7 +91,7 @@ export default {
         account: undefined
       },
       accountBalance: null,
-      splitRecordExcelMapping: [
+      tranferRecordExcelMapping: [
         {
           text: 'from',
           value: 'from'
@@ -120,8 +119,8 @@ export default {
   methods: {
     exportExcel() {
       const excelName = 'batch_transfer_result' + '_' + getCurrentTime()
-      const tHeader = this.splitRecordExcelMapping.map((item) => item.text)
-      const filterVal = this.splitRecordExcelMapping.map(
+      const tHeader = this.tranferRecordExcelMapping.map((item) => item.text)
+      const filterVal = this.tranferRecordExcelMapping.map(
         (item) => item.value
       )
       const data = this.formatJson(filterVal, this.list)
@@ -134,12 +133,10 @@ export default {
       this.getBlocks(hashes)
     },
     async getBlocks(hashes) {
-      console.log('#receive hashes# ' + hashes)
       const { blocks } = await this.mcp.request.getBlocks(hashes)
       if (blocks?.length > 0) {
         blocks.forEach(async block => {
           const stateResult = await this.mcp.request.getBlockState(block.hash)
-          console.log('#receive stateResult# ' + JSON.stringify(stateResult))
           const mc_timestamp = stateResult?.block_state?.stable_content?.mc_timestamp
           let time = ''
           if (mc_timestamp) {
@@ -149,15 +146,18 @@ export default {
             from: block.from,
             to: block?.content?.to,
             hash: block.hash,
-            amount: block?.content?.amount,
+            amount: this.formatAmount(block?.content?.amount),
             time
           })
-          console.log('#receive list#' + this.list)
           if (blocks?.length === this.list.length) {
             this.exportExcel()
           }
         })
       }
+    },
+    formatAmount(amount) {
+      if (!amount) { return '' }
+      return typeof amount === 'number' ? amount / Math.pow(10, 18) : parseInt(amount) / Math.pow(10, 18)
     },
     async getAccountBalance() {
       const { balance } = await this.mcp.request.accountBalance(this.listQuery.account)
@@ -166,19 +166,10 @@ export default {
       }
     },
     getAccount(account) {
-      console.log('#receive account# ' + account)
       this.listQuery.account = account
     },
     filterHandler(value, row, column) {
       return row['direction'] === value
-    },
-    cellStyle({ row, column }) {
-      if (row.direction && row.direction === 'Send' && (column.property === 'from' || column.property === 'direction')) {
-        return {
-          'backgroundColor': '#67C23A',
-          'color': 'white'
-        }
-      }
     }
   }
 }
