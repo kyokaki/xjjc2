@@ -54,15 +54,22 @@
             <el-table-column
               fixed="right"
               label="operate"
-              width="70"
+              width="140"
             >
               <template slot-scope="scope">
                 <el-button
-                  type="text"
+                  type="primary"
                   size="small"
                   @click.native.prevent="handleUse(scope.$index, scope.row)"
                 >
                   Use
+                </el-button>
+                <el-button
+                  type="danger"
+                  size="small"
+                  @click.native.prevent="handleDelete(scope.$index, scope.row)"
+                >
+                  Del
                 </el-button>
               </template>
             </el-table-column>
@@ -109,6 +116,24 @@ export default {
     handleUse(index, rows) {
       this.form.keystore = rows.keystore
     },
+    handleDelete(index, rows) {
+      this.$confirm('This operation will permanently delete the keystore, whether to continue?', 'warning', {
+        confirmButtonText: 'Confirm',
+        cancelButtonText: 'Cancel',
+        type: 'warning'
+      }).then(() => {
+        this.deleteKeystore(rows.name)
+        this.$message({
+          type: 'success',
+          message: 'Successfully deleted!'
+        })
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: 'Undeleted!'
+        })
+      })
+    },
     handleKeyStoreTemplate() {
       this.getKeystoreList()
       this.showKeystoreTemplate = !this.showKeystoreTemplate
@@ -123,6 +148,7 @@ export default {
           type: 'success',
           message: 'New Keystore Template: ' + value
         })
+        this.getKeystoreList()
       }).catch(() => {
         this.$message({
           type: 'info',
@@ -134,6 +160,18 @@ export default {
       const keystoreStr = localStorage.getItem(this.keystoreHistoryKey)
       this.keystoreList = keystoreStr ? JSON.parse(keystoreStr) : []
     },
+    deleteKeystore(name) {
+      const keystoreStr = localStorage.getItem(this.keystoreHistoryKey)
+      let keystoreArray = []
+      if (keystoreStr) {
+        keystoreArray = JSON.parse(keystoreStr)
+        keystoreArray = keystoreArray.filter(item => {
+          return item.name !== name
+        })
+      }
+      localStorage.setItem(this.keystoreHistoryKey, JSON.stringify(keystoreArray))
+      this.getKeystoreList()
+    },
     keepKeystore(name, keystore) {
       keystore = typeof keystore === 'string' ? keystore : JSON.stringify(keystore)
       const keystoreStr = localStorage.getItem(this.keystoreHistoryKey)
@@ -142,6 +180,8 @@ export default {
         keystoreArray = JSON.parse(keystoreStr)
       }
       keystoreArray.push({ name, keystore })
+      debugger
+      keystoreArray = [...new Set(keystoreArray.map(item => JSON.stringify(item)))].map(item => JSON.parse(item))
       localStorage.setItem(this.keystoreHistoryKey, JSON.stringify(keystoreArray))
     },
     handleClose(done) {
