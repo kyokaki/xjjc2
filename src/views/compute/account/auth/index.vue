@@ -6,9 +6,14 @@
           <span>Account Authentication</span>
         </div>
         <el-form ref="form" :model="form" size="mini" :rules="rules" label-position="left" :disabled="disabledFlag">
-          <el-form-item label="keystore" prop="keystore">
-            <el-input v-model="form.keystore" type="textarea" rows="3" :placeholder="keystorePlaceholder" />
+
+          <el-form-item>
+            <el-button type="primary" @click="handleKeyStoreTemplate">Template</el-button>
           </el-form-item>
+          <el-form-item label="keystore" prop="keystore">
+            <el-input v-model="form.keystore" type="textarea" rows="4" :placeholder="keystorePlaceholder" />
+          </el-form-item>
+
           <el-form-item label="keystore password" prop="password">
             <el-input v-model="form.password" type="password" />
           </el-form-item>
@@ -17,6 +22,54 @@
             <el-button type="primary" @click="handleCheck">Check</el-button>
           </el-form-item>
         </el-form>
+      </el-card>
+
+      <el-card v-if="showKeystoreTemplate" class="box-card">
+        <div slot="header" class="clearfix">
+          <span>Keystore Template</span>
+        </div>
+        <div>
+          <el-table
+            v-loading="listLoading"
+            :data="keystoreList"
+            border
+            fit
+            highlight-current-row
+            style="width: 100%"
+            size="mini"
+            empty-text="No data"
+          >
+            <el-table-column align="center" label="name">
+              <template slot-scope="{ row }">
+                <span>{{ row.name }}</span>
+              </template>
+            </el-table-column>
+
+            <el-table-column align="center" label="keystore">
+              <template slot-scope="{ row }">
+                <span>{{ row.keystore }}</span>
+              </template>
+            </el-table-column>
+
+            <el-table-column
+              fixed="right"
+              label="operate"
+              width="70"
+            >
+              <template slot-scope="scope">
+                <el-button
+                  type="text"
+                  size="small"
+                  @click.native.prevent="handleUse(scope.$index, scope.row)"
+                >
+                  Use
+                </el-button>
+              </template>
+            </el-table-column>
+
+          </el-table>
+        </div>
+
       </el-card>
 
     </div>
@@ -32,6 +85,10 @@ export default {
   directives: { waves },
   data() {
     return {
+      keystoreList: [],
+      listLoading: false,
+      showKeystoreTemplate: false,
+      keystoreHistoryKey: 'KEYSTORE_HISTORY_KEY',
       rules: {
         keystore: [{ required: true, trigger: 'blur' }],
         password: [{ required: true, trigger: 'blur' }]
@@ -49,6 +106,54 @@ export default {
     this.mcp = new Mcp('https://huygens.computecoin.network/')
   },
   methods: {
+    handleUse(index, rows) {
+      this.form.keystore = rows.keystore
+    },
+    handleKeyStoreTemplate() {
+      this.getKeystoreList()
+      this.showKeystoreTemplate = !this.showKeystoreTemplate
+    },
+    openSaveMessageBox() {
+      this.$prompt('Please enter keystore template name', 'Keystore Template', {
+        confirmButtonText: 'Confirm',
+        cancelButtonText: 'Cancel'
+      }).then(({ value }) => {
+        this.keepKeystore(value, this.form.keystore)
+        this.$message({
+          type: 'success',
+          message: 'New Keystore Template: ' + value
+        })
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: 'Cancel Created'
+        })
+      })
+    },
+    getKeystoreList() {
+      const keystoreStr = localStorage.getItem(this.keystoreHistoryKey)
+      this.keystoreList = keystoreStr ? JSON.parse(keystoreStr) : []
+    },
+    keepKeystore(name, keystore) {
+      keystore = typeof keystore === 'string' ? keystore : JSON.stringify(keystore)
+      const keystoreStr = localStorage.getItem(this.keystoreHistoryKey)
+      let keystoreArray = []
+      if (keystoreStr) {
+        keystoreArray = JSON.parse(keystoreStr)
+      }
+      keystoreArray.push({ name, keystore })
+      localStorage.setItem(this.keystoreHistoryKey, JSON.stringify(keystoreArray))
+    },
+    handleClose(done) {
+      this.$confirm('Confirm to close?', '', {
+        cancelButtonText: 'Cancel',
+        confirmButtonText: 'Confirm'
+      })
+        .then(_ => {
+          done()
+        })
+        .catch(_ => {})
+    },
     ...mapActions({
       setCompute: 'compute/setCompute'
     }),
@@ -68,10 +173,23 @@ export default {
       const unlockResult = await this.accountUnlock(importResult)
       if (unlockResult.code === 0) {
         this.keepContent()
-        return this.$message.success('CHECK Account Authentication: ' + unlockResult.msg)
+        this.$message.success('CHECK Account Authentication: ' + unlockResult.msg)
+        return this.askForTemplate()
       } else {
         return this.$message.error('CHECK Account Authentication: ' + unlockResult.msg)
       }
+    },
+    askForTemplate() {
+      setTimeout(() => {
+        this.$confirm('Do you need to save the keystore as a template?', '', {
+          cancelButtonText: 'Cancel',
+          confirmButtonText: 'Confirm'
+        })
+          .then(_ => {
+            this.openSaveMessageBox()
+          })
+          .catch(_ => {})
+      }, 300)
     },
     keepContent() {
       this.setCompute({
@@ -82,7 +200,6 @@ export default {
         key: 'keystorePwd',
         value: this.form.password
       })
-      this.disabledFlag = true
     },
     accountUnlock(importResult) {
       try {
@@ -105,5 +222,12 @@ export default {
 }
 </script>
 <style scoped>
-
+.filter-container {
+  display: flex;
+}
+.box-card {
+  width: 50%;
+  min-height: 350px;
+  flex:1;
+}
 </style>
