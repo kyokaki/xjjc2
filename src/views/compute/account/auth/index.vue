@@ -39,13 +39,13 @@
             size="mini"
             empty-text="No data"
           >
-            <el-table-column align="center" label="name">
+            <el-table-column align="center" label="name" :show-overflow-tooltip="true">
               <template slot-scope="{ row }">
                 <span>{{ row.name }}</span>
               </template>
             </el-table-column>
 
-            <el-table-column align="center" label="keystore">
+            <el-table-column align="center" label="keystore" :show-overflow-tooltip="true">
               <template slot-scope="{ row }">
                 <span>{{ row.keystore }}</span>
               </template>
@@ -122,7 +122,7 @@ export default {
         cancelButtonText: 'Cancel',
         type: 'warning'
       }).then(() => {
-        this.deleteKeystore(rows.name)
+        this.deleteKeystore(rows)
         this.$message({
           type: 'success',
           message: 'Successfully deleted!'
@@ -160,13 +160,13 @@ export default {
       const keystoreStr = localStorage.getItem(this.keystoreHistoryKey)
       this.keystoreList = keystoreStr ? JSON.parse(keystoreStr) : []
     },
-    deleteKeystore(name) {
+    deleteKeystore(rows) {
       const keystoreStr = localStorage.getItem(this.keystoreHistoryKey)
       let keystoreArray = []
       if (keystoreStr) {
         keystoreArray = JSON.parse(keystoreStr)
         keystoreArray = keystoreArray.filter(item => {
-          return item.name !== name
+          return item.name !== rows.name || item.keystore !== rows.keystore
         })
       }
       localStorage.setItem(this.keystoreHistoryKey, JSON.stringify(keystoreArray))
