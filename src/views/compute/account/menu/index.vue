@@ -1,41 +1,21 @@
-
 <template>
   <div>
     <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal" @select="handleSelect">
-      <el-menu-item index="1">About</el-menu-item>
-      <el-menu-item index="2">Donation</el-menu-item>
+      <el-menu-item index="1" style="float:right">About</el-menu-item>
     </el-menu>
     <!--  about -->
     <el-dialog
-      title="About Computecoin Batch Transfer Tool"
+      title="About"
       :visible.sync="aboutDialogVisible"
       width="30%"
       center
     >
       <div class="donation-address">
-        <div>区块链应用研究室</div>
-        <div>franklinmastermouse@gmail.com</div>
+        <h3>CCN区块链技术应用研究实验室</h3>
+        <h3>franklinmastermouse@gmail.com</h3>
       </div>
       <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="aboutDialogVisible = false">确 定</el-button>
-      </span>
-    </el-dialog>
-    <!-- 捐款 -->
-    <el-dialog
-      title="About Computecoin Batch Transfer Tool"
-      :visible.sync="donationDialogVisible"
-      width="30%"
-      center
-    >
-      <div class="donation-address">
-        <div>
-          捐赠地址
-        </div>
-        <el-image src="./two.png" />
-      </div>
-
-      <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="donationDialogVisible = false">确 定</el-button>
+        <el-button type="primary" @click="aboutDialogVisible = false">OK</el-button>
       </span>
     </el-dialog>
   </div>
