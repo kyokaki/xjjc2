@@ -18,7 +18,7 @@ service.interceptors.request.use(
     // do something before request is sent
 
     if (config.data) {
-      config.data.requestSystem = 'compute-h5'
+      config.data.requestSystem = 'compute-wallet-h5'
       config.data.traceLogId = uuid()
       console.log('###$请求:', 'URL=', config.url, 'traceLogId=', config.data.traceLogId, 'request config=', config)
       // 读取质押位数: 默认为小数点后4位

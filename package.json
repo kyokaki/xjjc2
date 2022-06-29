@@ -1,7 +1,7 @@
 {
-  "name": "compute-h5",
+  "name": "compute-wallet-h5",
   "version": "4.4.0",
-  "description": "compute-h5 with Element UI & axios & iconfont & permission control & lint",
+  "description": "compute-wallet-h5 with Element UI & axios & iconfont & permission control & lint",
   "scripts": {
     "dev": "vue-cli-service serve",
     "build:prod": "vue-cli-service build",
